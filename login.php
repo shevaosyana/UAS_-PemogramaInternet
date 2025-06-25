@@ -16,7 +16,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         header("Location: dashboard.php");
         exit();
     } else {
-        $error = "Invalid username or password";
+        $error = "Username atau password salah";
     }
 }
 ?>
@@ -33,7 +33,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
         body {
             display: flex;
             justify-content: center;
@@ -41,7 +40,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             min-height: 100vh;
             background: linear-gradient(45deg, #6b48ff, #ff4848);
         }
-
         .login-container {
             background: rgba(255, 255, 255, 0.95);
             padding: 2rem;
@@ -50,35 +48,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             width: 100%;
             max-width: 400px;
         }
-
         .login-header {
             text-align: center;
             margin-bottom: 2rem;
         }
-
         .login-header h1 {
             color: #333;
             font-size: 2rem;
             margin-bottom: 0.5rem;
         }
-
         .login-form {
             display: flex;
             flex-direction: column;
             gap: 1rem;
         }
-
         .form-group {
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
         }
-
         .form-group label {
             color: #555;
             font-size: 0.9rem;
         }
-
         .form-group input {
             padding: 0.8rem;
             border: 1px solid #ddd;
@@ -86,12 +78,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             font-size: 1rem;
             transition: border-color 0.3s ease;
         }
-
         .form-group input:focus {
             outline: none;
             border-color: #6b48ff;
         }
-
         .login-button {
             background: #6b48ff;
             color: white;
@@ -102,26 +92,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
-
         .login-button:hover {
             background: #5536e0;
         }
-
-        .forgot-password {
+        .register-link {
             text-align: center;
             margin-top: 1rem;
         }
-
-        .forgot-password a {
+        .register-link a {
             color: #6b48ff;
             text-decoration: none;
             font-size: 0.9rem;
         }
-
-        .forgot-password a:hover {
+        .register-link a:hover {
             text-decoration: underline;
         }
-
         .error-message {
             color: #ff4848;
             text-align: center;
@@ -133,7 +118,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="login-container">
         <div class="login-header">
             <h1>Welcome Back</h1>
-            <p>Please login to your account</p>
+            <p>Silakan login ke akun Anda</p>
         </div>
         <?php if (isset($error)): ?>
             <div class="error-message"><?php echo $error; ?></div>
@@ -141,15 +126,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <form class="login-form" method="POST" action="">
             <div class="form-group">
                 <label for="username">Username</label>
-                <input type="text" id="username" name="username" placeholder="Enter your username" required>
+                <input type="text" id="username" name="username" placeholder="Masukkan username" required>
             </div>
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                <input type="password" id="password" name="password" placeholder="Masukkan password" required>
             </div>
             <button type="submit" class="login-button">Login</button>
-            <div class="forgot-password">
-                <a href="#">Forgot Password?</a>
+            <div class="register-link">
+                <a href="register.html">Belum punya akun? Register</a>
             </div>
         </form>
     </div>
