@@ -10,7 +10,14 @@ if (!isset($_SESSION['user_id'])) {
 require_once 'config.php';
 
 // Fetch users from database
-$stmt = $pdo->query("SELECT * FROM users ORDER BY id DESC");
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+if ($search !== '') {
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE username LIKE ? OR email LIKE ? ORDER BY id DESC");
+    $like = "%$search%";
+    $stmt->execute([$like, $like]);
+} else {
+    $stmt = $pdo->query("SELECT * FROM users ORDER BY id DESC");
+}
 $users = $stmt->fetchAll();
 ?>
 <!DOCTYPE html>

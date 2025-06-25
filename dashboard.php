@@ -286,6 +286,26 @@ if (!isset($_SESSION['user_id'])) {
                 grid-template-columns: 1fr;
             }
         }
+
+        .dark-mode {
+            background: #181a1b !important;
+            color: #e8e6e3 !important;
+        }
+        .dark-mode .sidebar {
+            background: linear-gradient(135deg, #232526 0%, #414345 100%) !important;
+            color: #e8e6e3 !important;
+        }
+        .dark-mode .main-content, .dark-mode .top-header, .dark-mode .stat-card, .dark-mode .content-card {
+            background: #232526 !important;
+            color: #e8e6e3 !important;
+        }
+        .dark-mode .sidebar-menu .menu-item:hover, .dark-mode .sidebar-menu .menu-item.active {
+            background: rgba(255,255,255,0.08) !important;
+            color: #fff !important;
+        }
+        .dark-mode .logout-btn {
+            background: #b52a37 !important;
+        }
     </style>
 </head>
 <body>
@@ -296,6 +316,9 @@ if (!isset($_SESSION['user_id'])) {
             <h2>Admin Panel</h2>
             <p>Welcome back!</p>
         </div>
+        <form action="users.php" method="get" style="padding: 1rem 1.5rem 0 1.5rem;">
+            <input type="text" name="search" placeholder="Cari user..." style="width: 100%; padding: 0.5rem 1rem; border-radius: 20px; border: none; outline: none; margin-bottom: 1rem;">
+        </form>
         <div class="sidebar-menu">
             <a href="#" class="menu-item active">
                 <i class="fas fa-home"></i>
@@ -305,19 +328,15 @@ if (!isset($_SESSION['user_id'])) {
                 <i class="fas fa-users"></i>
                 <span>Users</span>
             </a>
-            <a href="#" class="menu-item">
-                <i class="fas fa-chart-bar"></i>
-                <span>Analytics</span>
-            </a>
-            <a href="#" class="menu-item">
+            <a href="settings.php" class="menu-item">
                 <i class="fas fa-cog"></i>
                 <span>Settings</span>
             </a>
-            <a href="#" class="menu-item">
+            <a href="reports.php" class="menu-item">
                 <i class="fas fa-file-alt"></i>
                 <span>Reports</span>
             </a>
-            <a href="#" class="menu-item">
+            <a href="notifications.php" class="menu-item">
                 <i class="fas fa-bell"></i>
                 <span>Notifications</span>
             </a>
@@ -333,7 +352,12 @@ if (!isset($_SESSION['user_id'])) {
                 <div class="user-avatar">
                     <?php echo strtoupper(substr($_SESSION['username'], 0, 1)); ?>
                 </div>
-                <span><?php echo htmlspecialchars($_SESSION['username']); ?></span>
+                <span>
+                    <a href="profile.php" style="color:inherit;text-decoration:underline;cursor:pointer;">
+                        <?php echo htmlspecialchars($_SESSION['username']); ?>
+                    </a>
+                </span>
+                <button id="darkModeToggle" style="background:none;border:none;cursor:pointer;font-size:1.3rem;" title="Toggle Dark Mode">🌙</button>
                 <a href="logout.php" class="logout-btn">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </a>
@@ -491,6 +515,22 @@ if (!isset($_SESSION['user_id'])) {
             }
         `;
         document.head.appendChild(style);
+
+        // Dark mode toggle
+        const toggleBtn = document.getElementById('darkModeToggle');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const setDark = (on) => {
+            document.body.classList.toggle('dark-mode', on);
+            localStorage.setItem('darkMode', on ? '1' : '0');
+            toggleBtn.textContent = on ? '☀️' : '🌙';
+        };
+        const initDark = () => {
+            const saved = localStorage.getItem('darkMode');
+            if (saved === null) setDark(prefersDark);
+            else setDark(saved === '1');
+        };
+        toggleBtn.onclick = () => setDark(!document.body.classList.contains('dark-mode'));
+        initDark();
     </script>
 </body>
 </html> 
