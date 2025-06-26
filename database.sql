@@ -24,4 +24,11 @@ CREATE TABLE barang (
     merk VARCHAR(100) NOT NULL,
     status VARCHAR(50) NOT NULL,
     nomor VARCHAR(50) NOT NULL
+);
+
+-- Create lokasi table
+CREATE TABLE IF NOT EXISTS lokasi (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nama VARCHAR(100) NOT NULL,
+    keterangan TEXT
 ); 

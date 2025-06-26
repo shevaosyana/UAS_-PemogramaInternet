@@ -38,6 +38,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             font-family: 'Inter', Arial, sans-serif;
             position: relative;
             overflow: hidden;
+            background: #f6f8fc;
+            color: #222;
+            margin: 0;
+            padding: 0;
         }
         /* SVG Ornaments */
         .bg-svg {
@@ -215,6 +219,81 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 width: 98vw;
             }
         }
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 60px;
+            background: linear-gradient(90deg, #667eea 60%, #764ba2 100%);
+            color: #fff;
+            padding: 0 32px;
+            box-shadow: 0 2px 8px rgba(102,126,234,0.08);
+        }
+        .topbar .logo {
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+            font-size: 1.3rem;
+            letter-spacing: 2px;
+        }
+        .topbar .logo img {
+            height: 38px;
+            margin-right: 12px;
+            border-radius: 50%;
+            background: #fff;
+            padding: 2px;
+        }
+        .sidebar {
+            width: 230px;
+            background: #fff;
+            border-right: 1.5px solid #ececec;
+            min-height: 100vh;
+            box-shadow: 2px 0 8px rgba(102,126,234,0.04);
+            padding-top: 24px;
+        }
+        .sidebar .logo-wrap {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .sidebar .logo-wrap img {
+            height: 60px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(102,126,234,0.08);
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .sidebar li {
+            display: flex;
+            align-items: center;
+            padding: 10px 28px;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            color: #444;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: background 0.18s, color 0.18s;
+        }
+        .sidebar li.active, .sidebar li:hover {
+            background: linear-gradient(90deg, #e0e7ff 60%, #f3e8ff 100%);
+            color: #4b5bdc;
+        }
+        .sidebar li i {
+            margin-right: 14px;
+            font-size: 1.15rem;
+        }
+        .main-content {
+            flex: 1;
+            padding: 40px 48px 0 48px;
+        }
+        @media (max-width: 900px) {
+            .container { flex-direction: column; }
+            .sidebar { width: 100vw; min-height: auto; }
+            .main-content { padding: 24px 4vw 0 4vw; }
+        }
     </style>
 </head>
 <body>
@@ -260,5 +339,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
     </script>
+    <img src="images/logo_smk7.png" alt="Logo SMK 7 Baleendah" style="height:60px;">
+    <form class="quick-search" action="#" method="get" autocomplete="off">
+        <input type="text" id="quickSearchInput" placeholder="Cari barang/lokasi..." />
+        <button type="submit"><i class="fa fa-search"></i></button>
+        <div id="quickSearchResults" class="search-results"></div>
+    </form>
 </body>
 </html> 
