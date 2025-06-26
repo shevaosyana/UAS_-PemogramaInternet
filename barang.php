@@ -134,9 +134,10 @@ if (!isset($_SESSION['user_id'])) { header('Location: login.php'); exit(); }
             margin-bottom: 18px;
         }
         .barang-header h1 {
-            font-size: 1.3rem;
+            font-size: 1.6rem;
             font-weight: 700;
             margin: 0;
+            color: #222;
         }
         .barang-header .add-btn {
             background: linear-gradient(90deg, #667eea 60%, #764ba2 100%);
@@ -247,6 +248,35 @@ if (!isset($_SESSION['user_id'])) { header('Location: login.php'); exit(); }
             .barang-table-tools { flex-direction: column; gap: 10px; align-items: flex-start; }
             .table-footer { flex-direction: column; gap: 8px; align-items: flex-start; }
         }
+        .qr-card {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(102,126,234,0.10);
+            padding: 18px 32px;
+            margin-bottom: 24px;
+            width: fit-content;
+        }
+        .qr-desc {
+            font-weight: 600;
+            font-size: 1.08rem;
+            color: #4b5bdc;
+        }
+        #barcodeStatic {
+            width: 120px;
+            height: 120px;
+            background: #fff;
+            border-radius: 8px;
+            border: 1.5px solid #ececec;
+        }
+        .subtitle {
+            font-size: 1.05rem;
+            color: #888;
+            margin-top: 2px;
+            margin-bottom: 0;
+        }
     </style>
 </head>
 <body>
@@ -262,7 +292,7 @@ if (!isset($_SESSION['user_id'])) { header('Location: login.php'); exit(); }
             <div class="menu-group">
                 <div class="menu-title">Pengguna</div>
                 <ul>
-                    <li><i class="fa fa-user"></i> Pengguna <span class="collapse-toggle"><i class="fa fa-chevron-up"></i></span></li>
+                    <li><a href="users.php"><i class="fa fa-user"></i> Pengguna</a> <span class="collapse-toggle"><i class="fa fa-chevron-up"></i></span></li>
                 </ul>
             </div>
             <div class="menu-group">
@@ -274,21 +304,29 @@ if (!isset($_SESSION['user_id'])) { header('Location: login.php'); exit(); }
             <div class="menu-group">
                 <div class="menu-title">Lokasi</div>
                 <ul>
-                    <li><i class="fa fa-location-dot"></i> Lokasi <span class="collapse-toggle"><i class="fa fa-chevron-up"></i></span></li>
+                    <li><a href="lokasi.php"><i class="fa fa-location-dot"></i> Lokasi</a> <span class="collapse-toggle"><i class="fa fa-chevron-up"></i></span></li>
                 </ul>
             </div>
             <div class="menu-group">
                 <div class="menu-title">Produk</div>
                 <ul>
-                    <li><i class="fa fa-bookmark"></i> Produk <span class="collapse-toggle"><i class="fa fa-chevron-up"></i></span></li>
+                    <li><a href="produk.php"><i class="fa fa-bookmark"></i> Produk</a> <span class="collapse-toggle"><i class="fa fa-chevron-up"></i></span></li>
                 </ul>
             </div>
         </nav>
         <main class="main-content">
             <div class="breadcrumb">Barang &gt; Daftar</div>
             <div class="barang-header">
-                <h1>Barang</h1>
+                <div>
+                    <h1>Barang</h1>
+                    <div class="subtitle">Daftar inventaris barang SMK NEGERI 7 BALEENDAH</div>
+                </div>
                 <button class="add-btn"><i class="fa fa-plus"></i>Tambah</button>
+            </div>
+            <!-- QR Card -->
+            <div class="qr-card">
+                <canvas id="barcodeStatic"></canvas>
+                <div class="qr-desc">Scan untuk daftar barang</div>
             </div>
             <div class="barang-table-wrap">
                 <div class="barang-table-tools">
@@ -392,6 +430,15 @@ if (!isset($_SESSION['user_id'])) { header('Location: login.php'); exit(); }
     function closeBarcode() {
         document.getElementById('barcodeModal').style.display = 'none';
     }
+    // Barcode statis di atas tabel
+    new QRious({
+        element: document.getElementById('barcodeStatic'),
+        value: 'DAFTAR_BARANG',
+        size: 120,
+        background: '#fff',
+        foreground: '#222',
+        level: 'H'
+    });
     </script>
 </body>
 </html> 
