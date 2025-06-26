@@ -1,6 +1,10 @@
 <?php
 session_start();
 if (!isset($_SESSION['user_id'])) { header('Location: login.php'); exit(); }
+require_once 'config.php';
+// Ambil data barang dari database
+$stmt = $pdo->query("SELECT * FROM barang ORDER BY id DESC");
+$daftar_barang = $stmt->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -277,6 +281,64 @@ if (!isset($_SESSION['user_id'])) { header('Location: login.php'); exit(); }
             margin-top: 2px;
             margin-bottom: 0;
         }
+        .scan-btn {
+            background: linear-gradient(90deg, #667eea 60%, #764ba2 100%);
+            color: #fff;
+            border: none;
+            border-radius: 7px;
+            padding: 8px 18px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(102,126,234,0.08);
+            transition: background 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+        .scan-btn:hover {
+            background: linear-gradient(90deg, #4b5bdc 60%, #764ba2 100%);
+            box-shadow: 0 4px 16px rgba(102,126,234,0.13);
+        }
+        .modal-qr {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.18);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-qr-content {
+            background: #fff;
+            padding: 32px 32px 24px 32px;
+            border-radius: 14px;
+            box-shadow: 0 8px 32px rgba(102,126,234,0.13);
+            position: relative;
+            min-width: 340px;
+            min-height: 380px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .close-modal {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            color: #888;
+        }
+        .scan-result {
+            margin-top: 18px;
+            font-size: 1.08rem;
+            color: #222;
+            font-weight: 600;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -328,6 +390,51 @@ if (!isset($_SESSION['user_id'])) { header('Location: login.php'); exit(); }
                 <canvas id="barcodeStatic"></canvas>
                 <div class="qr-desc">Scan untuk daftar barang</div>
             </div>
+            <!-- Tombol Scan QR -->
+            <button class="scan-btn" onclick="openScanModal()"><i class="fa fa-qrcode"></i> Scan QR</button>
+            <!-- Modal Scan QR -->
+            <div id="scanModal" class="modal-qr" style="display:none;">
+                <div class="modal-qr-content">
+                    <button class="close-modal" onclick="closeScanModal()">&times;</button>
+                    <h2>Scan QR Barang</h2>
+                    <div id="qr-reader" style="width:320px;"></div>
+                    <div id="scanResult" class="scan-result"></div>
+                </div>
+            </div>
+            <!-- Modal Tambah Barang -->
+            <div id="modalTambahBarang" class="modal-qr" style="display:none;z-index:3000;">
+                <div class="modal-qr-content" style="min-width:380px;min-height:auto;">
+                    <button class="close-modal" onclick="closeTambahBarang()">&times;</button>
+                    <h2>Tambah Barang</h2>
+                    <form id="formTambahBarang" onsubmit="submitTambahBarang(event)">
+                        <div style="margin-bottom:12px;width:100%;">
+                            <label>Nama</label><br>
+                            <input type="text" name="nama" required style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid #ececec;">
+                        </div>
+                        <div style="margin-bottom:12px;width:100%;">
+                            <label>Lokasi</label><br>
+                            <input type="text" name="lokasi" required style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid #ececec;">
+                        </div>
+                        <div style="margin-bottom:12px;width:100%;">
+                            <label>Merk</label><br>
+                            <input type="text" name="merk" required style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid #ececec;">
+                        </div>
+                        <div style="margin-bottom:12px;width:100%;">
+                            <label>Status</label><br>
+                            <select name="status" required style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid #ececec;">
+                                <option value="Aktif">Aktif</option>
+                                <option value="Perlu Servis">Perlu Servis</option>
+                                <option value="Rusak">Rusak</option>
+                            </select>
+                        </div>
+                        <div style="margin-bottom:18px;width:100%;">
+                            <label>Nomor</label><br>
+                            <input type="text" name="nomor" required style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid #ececec;">
+                        </div>
+                        <button type="submit" class="add-btn" style="width:100%;justify-content:center;"><i class="fa fa-save"></i> Simpan</button>
+                    </form>
+                </div>
+            </div>
             <div class="barang-table-wrap">
                 <div class="barang-table-tools">
                     <div class="search">
@@ -352,34 +459,30 @@ if (!isset($_SESSION['user_id'])) { header('Location: login.php'); exit(); }
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td><input type="checkbox" /></td>
-                            <td>1</td>
-                            <td>Printer A</td>
-                            <td>Ruang Guru</td>
-                            <td>Epson</td>
-                            <td><span style="color:#28a745;font-weight:600;">Aktif</span></td>
-                            <td>INV-001</td>
-                            <td class="table-actions">
-                                <button title="Lihat Barcode" onclick="showBarcode('INV-001','Printer A')"><i class="fa fa-qrcode"></i></button>
-                                <button title="Edit"><i class="fa fa-edit"></i></button>
-                                <button title="Delete"><i class="fa fa-trash"></i></button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><input type="checkbox" /></td>
-                            <td>2</td>
-                            <td>Komputer B</td>
-                            <td>Lab Komputer</td>
-                            <td>Lenovo</td>
-                            <td><span style="color:#ffc107;font-weight:600;">Perlu Servis</span></td>
-                            <td>INV-002</td>
-                            <td class="table-actions">
-                                <button title="Lihat Barcode" onclick="showBarcode('INV-002','Komputer B')"><i class="fa fa-qrcode"></i></button>
-                                <button title="Edit"><i class="fa fa-edit"></i></button>
-                                <button title="Delete"><i class="fa fa-trash"></i></button>
-                            </td>
-                        </tr>
+<?php foreach ($daftar_barang as $i => $b): ?>
+    <tr>
+        <td><input type="checkbox" /></td>
+        <td><?= $i+1 ?></td>
+        <td><?= htmlspecialchars($b['nama']) ?></td>
+        <td><?= htmlspecialchars($b['lokasi']) ?></td>
+        <td><?= htmlspecialchars($b['merk']) ?></td>
+        <td>
+            <?php if ($b['status'] == 'Aktif'): ?>
+                <span style="color:#28a745;font-weight:600;">Aktif</span>
+            <?php elseif ($b['status'] == 'Perlu Servis'): ?>
+                <span style="color:#ffc107;font-weight:600;">Perlu Servis</span>
+            <?php else: ?>
+                <span style="color:#dc3545;font-weight:600;"><?= htmlspecialchars($b['status']) ?></span>
+            <?php endif; ?>
+        </td>
+        <td><?= htmlspecialchars($b['nomor']) ?></td>
+        <td class="table-actions">
+            <button title="Lihat Barcode" onclick="showBarcode('<?= htmlspecialchars($b['nomor']) ?>','<?= htmlspecialchars($b['nama']) ?>')"><i class="fa fa-qrcode"></i></button>
+            <button title="Edit"><i class="fa fa-edit"></i></button>
+            <button title="Delete"><i class="fa fa-trash"></i></button>
+        </td>
+    </tr>
+<?php endforeach; ?>
                     </tbody>
                 </table>
                 <div class="table-footer">
@@ -404,6 +507,7 @@ if (!isset($_SESSION['user_id'])) { header('Location: login.php'); exit(); }
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/minified/html5-qrcode.min.js"></script>
     <script>
     // Expand/collapse dummy (bisa dikembangkan untuk submenu)
     document.querySelectorAll('.collapse-toggle').forEach(function(toggle) {
@@ -439,6 +543,68 @@ if (!isset($_SESSION['user_id'])) { header('Location: login.php'); exit(); }
         foreground: '#222',
         level: 'H'
     });
+    // Modal Scan QR
+    function openScanModal() {
+        document.getElementById('scanModal').style.display = 'flex';
+        document.getElementById('scanResult').textContent = '';
+        if (!window.qrScanner) {
+            window.qrScanner = new Html5Qrcode("qr-reader");
+        }
+        window.qrScanner.start(
+            { facingMode: "environment" },
+            { fps: 10, qrbox: 220 },
+            qrCodeMessage => {
+                document.getElementById('scanResult').innerHTML = '<b>Hasil Scan:</b> ' + qrCodeMessage + '<br>Menampilkan detail barang...';
+                // Simulasi detail barang, bisa diubah sesuai kebutuhan
+                if(qrCodeMessage === 'INV-001') {
+                    document.getElementById('scanResult').innerHTML += '<div style="margin-top:10px;text-align:left;">Nama: Printer A<br>Lokasi: Ruang Guru<br>Merk: Epson<br>Status: <span style="color:#28a745;font-weight:600;">Aktif</span></div>';
+                } else if(qrCodeMessage === 'INV-002') {
+                    document.getElementById('scanResult').innerHTML += '<div style="margin-top:10px;text-align:left;">Nama: Komputer B<br>Lokasi: Lab Komputer<br>Merk: Lenovo<br>Status: <span style="color:#ffc107;font-weight:600;">Perlu Servis</span></div>';
+                } else {
+                    document.getElementById('scanResult').innerHTML += '<div style="margin-top:10px;">Barang tidak ditemukan.</div>';
+                }
+                window.qrScanner.stop();
+            },
+            errorMessage => {
+                // ignore errors
+            }
+        );
+    }
+    function closeScanModal() {
+        document.getElementById('scanModal').style.display = 'none';
+        if(window.qrScanner) window.qrScanner.stop();
+    }
+    // Modal Tambah Barang
+    document.querySelector('.add-btn').onclick = openTambahBarang;
+    function openTambahBarang() {
+        document.getElementById('modalTambahBarang').style.display = 'flex';
+    }
+    function closeTambahBarang() {
+        document.getElementById('modalTambahBarang').style.display = 'none';
+    }
+    function submitTambahBarang(e) {
+        e.preventDefault();
+        const form = e.target;
+        const data = new FormData(form);
+        fetch('barang_tambah.php', {
+            method: 'POST',
+            body: data
+        })
+        .then(res => res.json())
+        .then(res => {
+            if(res.success) {
+                alert('Barang berhasil ditambahkan!');
+                closeTambahBarang();
+                form.reset();
+                location.reload(); // reload agar data baru muncul di tabel
+            } else {
+                alert('Gagal menambah barang: ' + res.message);
+            }
+        })
+        .catch(err => {
+            alert('Terjadi kesalahan saat menambah barang.');
+        });
+    }
     </script>
 </body>
 </html> 

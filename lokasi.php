@@ -35,6 +35,9 @@ if (!isset($_SESSION['user_id'])) { header('Location: login.php'); exit(); }
     </div>
     <div class="container">
         <nav class="sidebar">
+            <div style="text-align:center;margin-bottom:18px;">
+                <img src="logo_smk7.png" alt="Logo SMK 7 Baleendah" style="height:60px;">
+            </div>
             <div class="menu-group">
                 <div class="menu-title">Pengguna</div>
                 <ul>
@@ -63,6 +66,39 @@ if (!isset($_SESSION['user_id'])) { header('Location: login.php'); exit(); }
         <main class="main-content">
             <h1>Daftar Lokasi</h1>
             <p>Halaman ini untuk menampilkan dan mengelola data lokasi di SMK NEGERI 7 BALEENDAH.</p>
+            <?php
+            require_once 'config.php';
+            // Proses tambah lokasi
+            if (isset($_POST['tambah_lokasi'])) {
+                $nama = trim($_POST['nama_lokasi']);
+                if ($nama !== '') {
+                    $stmt = $pdo->prepare("INSERT INTO lokasi (nama) VALUES (?)");
+                    $stmt->execute([$nama]);
+                    echo '<div style="color:green;margin-bottom:10px;">Lokasi berhasil ditambahkan!</div>';
+                }
+            }
+            $lokasiList = $pdo->query("SELECT * FROM lokasi ORDER BY id DESC")->fetchAll();
+            ?>
+            <form method="post" style="margin-bottom:18px;">
+                <input type="text" name="nama_lokasi" placeholder="Nama Lokasi" required style="padding:7px 10px;border-radius:6px;border:1px solid #ececec;">
+                <button type="submit" name="tambah_lokasi" style="padding:7px 18px;border-radius:6px;background:#4b5bdc;color:#fff;border:none;font-weight:600;">Tambah Lokasi</button>
+            </form>
+            <table style="width:100%;border-collapse:collapse;">
+                <thead>
+                    <tr style="background:#f6f6fa;">
+                        <th style="padding:8px 6px;">No</th>
+                        <th style="padding:8px 6px;">Nama Lokasi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach($lokasiList as $i => $l): ?>
+                    <tr>
+                        <td style="padding:8px 6px;"> <?= $i+1 ?> </td>
+                        <td style="padding:8px 6px;"> <?= htmlspecialchars($l['nama']) ?> </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
         </main>
     </div>
 </body>
