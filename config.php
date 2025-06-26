@@ -10,4 +10,9 @@ try {
 } catch(PDOException $e) {
     echo "Connection failed: " . $e->getMessage();
 }
+
+function catat_log($pdo, $user_id, $aktivitas) {
+    $stmt = $pdo->prepare("INSERT INTO log_aktivitas (user_id, aktivitas) VALUES (?, ?)");
+    $stmt->execute([$user_id, $aktivitas]);
+}
 ?> 

@@ -22,6 +22,10 @@ if ($nama === '' || $lokasi === '' || $merk === '' || $status === '' || $nomor =
 try {
     $stmt = $pdo->prepare("INSERT INTO barang (nama, lokasi, merk, status, nomor) VALUES (?, ?, ?, ?, ?)");
     $stmt->execute([$nama, $lokasi, $merk, $status, $nomor]);
+    // Catat log aktivitas
+    if (isset($_SESSION['user_id'])) {
+        catat_log($pdo, $_SESSION['user_id'], "Menambahkan barang $nama");
+    }
     echo json_encode(['success' => true, 'message' => 'Barang berhasil ditambahkan']);
 } catch (Exception $e) {
     echo json_encode(['success' => false, 'message' => 'Gagal menambah barang: ' . $e->getMessage()]);

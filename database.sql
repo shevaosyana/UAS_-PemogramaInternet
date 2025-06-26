@@ -31,4 +31,13 @@ CREATE TABLE IF NOT EXISTS lokasi (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nama VARCHAR(100) NOT NULL,
     keterangan TEXT
+);
+
+-- Create log aktivitas table
+CREATE TABLE IF NOT EXISTS log_aktivitas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    aktivitas VARCHAR(255),
+    waktu TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
 ); 

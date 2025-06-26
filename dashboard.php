@@ -15,6 +15,14 @@ $jenisBarang = $pdo->query("SELECT nama, COUNT(*) as jumlah FROM barang GROUP BY
 // Untuk pencarian cepat
 $allBarang = $pdo->query("SELECT nama FROM barang")->fetchAll(PDO::FETCH_COLUMN);
 $allLokasi = $pdo->query("SELECT nama FROM lokasi")->fetchAll(PDO::FETCH_COLUMN);
+// Log aktivitas terbaru
+$logList = $pdo->query("
+    SELECT l.*, u.username 
+    FROM log_aktivitas l 
+    LEFT JOIN users u ON l.user_id = u.id 
+    ORDER BY l.waktu DESC 
+    LIMIT 10
+")->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -249,6 +257,53 @@ $allLokasi = $pdo->query("SELECT nama FROM lokasi")->fetchAll(PDO::FETCH_COLUMN)
             .sidebar { padding-top: 8px; }
             .topbar { padding: 0 8px; }
         }
+        .log-card {
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 2px 10px rgba(102,126,234,0.06);
+            padding: 24px 28px 18px 28px;
+            margin-top: 36px;
+            max-width: 600px;
+        }
+        body.dark-mode .log-card {
+            background: #23283a;
+            color: #e2e6ef;
+        }
+        .log-card h3 {
+            margin-top: 0;
+            color: #4b5bdc;
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+        body.dark-mode .log-card h3 {
+            color: #ffc107;
+        }
+        .log-card ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .log-card li {
+            padding: 8px 0;
+            border-bottom: 1px solid #ececec;
+            font-size: 1.01rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        body.dark-mode .log-card li {
+            border-bottom: 1px solid #23283a;
+        }
+        .log-card li:last-child {
+            border-bottom: none;
+        }
+        .log-time {
+            color: #888;
+            font-size: 0.97rem;
+            margin-right: 8px;
+            min-width: 60px;
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
@@ -294,6 +349,17 @@ $allLokasi = $pdo->query("SELECT nama FROM lokasi")->fetchAll(PDO::FETCH_COLUMN)
                     <canvas id="chartJenis" width="340" height="220"></canvas>
                     <div class="chart-title">Jenis Barang Terbanyak</div>
                 </div>
+            </div>
+            <div class="log-card">
+                <h3>Log Aktivitas Terbaru</h3>
+                <ul>
+                    <?php foreach($logList as $log): ?>
+                    <li>
+                        <span class="log-time"><?= date('d/m H:i', strtotime($log['waktu'])) ?></span>
+                        <b><?= htmlspecialchars($log['username']) ?></b> <?= htmlspecialchars($log['aktivitas']) ?>
+                    </li>
+                    <?php endforeach; ?>
+                </ul>
             </div>
         </main>
     </div>
