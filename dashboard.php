@@ -23,6 +23,10 @@ $logList = $pdo->query("
     ORDER BY l.waktu DESC 
     LIMIT 10
 ")->fetchAll();
+// Statistik ringkasan
+$totalBarang = $pdo->query("SELECT COUNT(*) FROM barang")->fetchColumn();
+$totalLokasi = $pdo->query("SELECT COUNT(*) FROM lokasi")->fetchColumn();
+$totalProduk = $pdo->query("SELECT COUNT(*) FROM produk")->fetchColumn();
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -304,6 +308,46 @@ $logList = $pdo->query("
             min-width: 60px;
             display: inline-block;
         }
+        .statistik-ringkasan {
+            display: flex;
+            gap: 28px;
+            margin-bottom: 32px;
+            margin-top: 18px;
+            flex-wrap: wrap;
+        }
+        .stat-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(102,126,234,0.06);
+            padding: 22px 32px 18px 32px;
+            min-width: 160px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: background 0.3s, color 0.3s;
+        }
+        body.dark-mode .stat-card {
+            background: #23283a;
+            color: #e2e6ef;
+        }
+        .stat-title {
+            font-size: 1.01rem;
+            color: #888;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        body.dark-mode .stat-title {
+            color: #ffc107;
+        }
+        .stat-value {
+            font-size: 2.1rem;
+            font-weight: 700;
+            color: #4b5bdc;
+        }
+        body.dark-mode .stat-value {
+            color: #ffc107;
+        }
     </style>
 </head>
 <body>
@@ -336,6 +380,20 @@ $logList = $pdo->query("
         </nav>
         <main class="main-content">
             <h1>Dasbor</h1>
+            <div class="statistik-ringkasan">
+                <div class="stat-card">
+                    <div class="stat-title">Total Barang</div>
+                    <div class="stat-value"><?= $totalBarang ?></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Total Lokasi</div>
+                    <div class="stat-value"><?= $totalLokasi ?></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Kategori Produk</div>
+                    <div class="stat-value"><?= $totalProduk ?></div>
+                </div>
+            </div>
             <div style="background:#fff;border-radius:14px;box-shadow:0 2px 10px rgba(102,126,234,0.06);padding:32px 28px;max-width:600px;">
                 <h2 style="margin-top:0;color:#222;font-size:1.3rem;font-weight:600;">APLIKASI INVENTARIS BARANG</h2>
                 <p style="color:#555;font-size:1.08rem;">SMK NEGERI 7 BALEENDAH</p>

@@ -13,17 +13,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($user && password_verify($password, $user['password'])) {
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['username'] = $user['username'];
-        catat_log($pdo, $user['id'], "Login ke sistem");
         header("Location: dashboard.php");
         exit();
     } else {
         $error = "Email atau kata sandi salah";
     }
-}
-
-function catat_log($pdo, $user_id, $aktivitas) {
-    $stmt = $pdo->prepare("INSERT INTO log_aktivitas (user_id, aktivitas) VALUES (?, ?)");
-    $stmt->execute([$user_id, $aktivitas]);
 }
 ?>
 <!DOCTYPE html>

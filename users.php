@@ -19,6 +19,12 @@ if ($search !== '') {
     $stmt = $pdo->query("SELECT * FROM users ORDER BY id DESC");
 }
 $users = $stmt->fetchAll();
+
+// Fetch latest log aktivitas (5 terbaru)
+$logList = $pdo->query("SELECT l.*, u.username FROM log_aktivitas l LEFT JOIN users u ON l.user_id = u.id ORDER BY l.waktu DESC LIMIT 5")->fetchAll();
+
+// Ambil produk dengan stok <= 3 (limit rendah) atau stok = 0 (habis)
+$produkLimit = $pdo->query("SELECT * FROM produk WHERE stok <= 3 ORDER BY stok ASC, nama ASC")->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -28,144 +34,124 @@ $users = $stmt->fetchAll();
     <title>Users Management</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
         body {
-            background: #f8f9fa;
+            background: #f4f6fb;
+            font-family: 'Inter', Arial, sans-serif;
         }
-
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
+            max-width: 700px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(102,126,234,0.13);
+            padding: 32px 36px 36px 36px;
         }
-
-        .header {
-            background: white;
-            padding: 1rem 2rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
+        h2 {
+            font-weight: 700;
+            color: #4b5bdc;
+            margin-bottom: 24px;
         }
-
-        .page-title {
-            font-size: 1.5rem;
-            color: #333;
-            font-weight: 600;
-        }
-
-        .logout-btn {
-            background: #dc3545;
-            color: white;
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            text-decoration: none;
-            font-size: 0.9rem;
-        }
-
-        .content-card {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-
-        .card-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .card-header h3 {
-            color: #333;
-            font-size: 1.2rem;
-        }
-
-        .add-user-btn {
-            background: #28a745;
-            color: white;
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            text-decoration: none;
-            font-size: 0.9rem;
-        }
-
-        .card-body {
-            padding: 1.5rem;
-        }
-
         .users-table {
             width: 100%;
             border-collapse: collapse;
+            margin-bottom: 18px;
         }
-
-        .users-table th,
-        .users-table td {
-            padding: 1rem;
+        .users-table th, .users-table td {
+            padding: 14px 10px;
             text-align: left;
-            border-bottom: 1px solid #eee;
         }
-
         .users-table th {
-            background: #f8f9fa;
+            background: #f6f6fa;
+            color: #444;
             font-weight: 600;
-            color: #333;
+            border-bottom: 2px solid #ececec;
         }
-
+        .users-table tr:nth-child(even) {
+            background: #f9faff;
+        }
         .users-table tr:hover {
-            background: #f8f9fa;
+            background: #e0e7ff;
+            transition: background 0.2s;
         }
-
-        .action-buttons {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .edit-btn {
-            background: #ffc107;
-            color: #333;
-            padding: 0.3rem 0.6rem;
+        .btn {
             border: none;
-            border-radius: 3px;
+            border-radius: 6px;
+            padding: 7px 16px;
+            font-size: 1rem;
+            font-weight: 600;
             cursor: pointer;
-            font-size: 0.8rem;
-            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.18s, color 0.18s;
         }
-
-        .delete-btn {
-            background: #dc3545;
-            color: white;
-            padding: 0.3rem 0.6rem;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 0.8rem;
+        .btn-edit {
+            background: #ffe066;
+            color: #7c5c00;
         }
-
-        .back-btn {
-            background: #6c757d;
-            color: white;
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            text-decoration: none;
-            font-size: 0.9rem;
-            margin-right: 1rem;
+        .btn-edit:hover {
+            background: #ffd43b;
+            color: #5c4300;
         }
+        .btn-delete {
+            background: #ff6b6b;
+            color: #fff;
+        }
+        .btn-delete:hover {
+            background: #fa5252;
+        }
+        .btn-add {
+            background: #51cf66;
+            color: #fff;
+            margin-bottom: 18px;
+            float: right;
+        }
+        .btn-add:hover {
+            background: #40c057;
+        }
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #e0e7ff;
+            color: #4b5bdc;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-right: 8px;
+            font-size: 1.1rem;
+        }
+        @media (max-width: 600px) {
+            .container { padding: 12px 2vw; }
+            .users-table th, .users-table td { padding: 8px 4px; font-size: 0.95rem; }
+            .btn { font-size: 0.95rem; padding: 6px 10px; }
+        }
+        .log-card {
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 2px 10px rgba(102,126,234,0.06);
+            padding: 18px 22px 12px 22px;
+            margin-bottom: 24px;
+        }
+        .log-card ul { list-style: none; padding: 0; margin: 0; }
+        .log-card li { padding: 8px 0; border-bottom: 1px solid #ececec; font-size: 1.01rem; display: flex; align-items: center; gap: 8px; }
+        .log-card li:last-child { border-bottom: none; }
+        .log-time { color: #888; font-size: 0.97rem; margin-right: 8px; min-width: 60px; display: inline-block; }
+        .alert-stok {
+            background: #fff3cd;
+            color: #856404;
+            border: 1.5px solid #ffe066;
+            border-radius: 8px;
+            padding: 16px 22px;
+            margin: 0 auto 24px auto;
+            max-width: 700px;
+            font-size: 1.05rem;
+            box-shadow: 0 2px 10px rgba(255,224,102,0.08);
+        }
+        .alert-stok ul { margin: 8px 0 0 18px; padding: 0; }
+        .alert-stok li { margin-bottom: 2px; }
+        .alert-stok i { color: #ffc107; margin-right: 8px; }
     </style>
 </head>
 <body>
@@ -181,44 +167,74 @@ $users = $stmt->fetchAll();
         </div>
     </div>
 
-    <div class="container">
-        <div class="content-card">
-            <div class="card-header">
-                <h3>All Users</h3>
-                <a href="add_user.php" class="add-user-btn">
-                    <i class="fas fa-plus"></i> Add New User
-                </a>
+    <?php if (count($produkLimit) > 0): ?>
+    <div class="alert-stok">
+        <i class="fas fa-exclamation-triangle"></i>
+        <b>Perhatian!</b> Ada barang dengan stok menipis/habis:
+        <ul>
+            <?php foreach($produkLimit as $p): ?>
+                <li>
+                    <b><?= htmlspecialchars($p['nama']) ?></b> (Stok: <span style="color:<?= $p['stok']==0?'#dc3545':'#ffc107' ?>;font-weight:600;">
+                        <?= $p['stok'] ?>
+                    </span>)
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    </div>
+    <?php endif; ?>
+
+    <div class="container" style="display: flex; gap: 32px; align-items: flex-start;">
+        <div style="flex:2;">
+            <div class="content-card">
+                <div class="card-header">
+                    <h3>All Users</h3>
+                    <a href="add_user.php" class="btn btn-add">
+                        <i class="fas fa-user-plus"></i> Add New User
+                    </a>
+                </div>
+                <div class="card-body">
+                    <table class="users-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($users as $user): ?>
+                            <tr>
+                                <td><?php echo $user['id']; ?></td>
+                                <td>
+                                    <span class="avatar"><?php echo strtoupper(substr($user['username'],0,1)); ?></span>
+                                    <?php echo htmlspecialchars($user['username']); ?>
+                                </td>
+                                <td><?php echo htmlspecialchars($user['email'] ?? 'N/A'); ?></td>
+                                <td>
+                                    <button class="btn btn-edit"><i class="fas fa-edit"></i> Edit</button>
+                                    <button class="btn btn-delete" onclick="deleteUser(<?php echo $user['id']; ?>)"><i class="fas fa-trash"></i> Delete</button>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            <div class="card-body">
-                <table class="users-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Username</th>
-                            <th>Email</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($users as $user): ?>
-                        <tr>
-                            <td><?php echo $user['id']; ?></td>
-                            <td><?php echo htmlspecialchars($user['username']); ?></td>
-                            <td><?php echo htmlspecialchars($user['email'] ?? 'N/A'); ?></td>
-                            <td>
-                                <div class="action-buttons">
-                                    <a href="#" class="edit-btn">
-                                        <i class="fas fa-edit"></i> Edit
-                                    </a>
-                                    <button class="delete-btn" onclick="deleteUser(<?php echo $user['id']; ?>)">
-                                        <i class="fas fa-trash"></i> Delete
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+        </div>
+        <div style="flex:1; min-width:260px;">
+            <div class="log-card">
+                <h3 style="margin-top:0; color:#4b5bdc; font-size:1.1rem; font-weight:700;">Log Aktivitas Terbaru</h3>
+                <ul style="list-style:none; padding:0; margin:0;">
+                    <?php foreach($logList as $log): ?>
+                    <li style="padding:8px 0; border-bottom:1px solid #ececec; font-size:0.98rem; display:flex; align-items:center; gap:8px;">
+                        <span style="color:#888; font-size:0.97rem; min-width:60px; display:inline-block;">
+                            <?= date('d/m H:i', strtotime($log['waktu'])) ?>
+                        </span>
+                        <b><?= htmlspecialchars($log['username']) ?></b> <?= htmlspecialchars($log['aktivitas']) ?>
+                    </li>
+                    <?php endforeach; ?>
+                </ul>
             </div>
         </div>
     </div>

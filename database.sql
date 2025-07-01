@@ -40,4 +40,14 @@ CREATE TABLE IF NOT EXISTS log_aktivitas (
     aktivitas VARCHAR(255),
     waktu TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+-- Create produk table
+CREATE TABLE IF NOT EXISTS produk (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nama VARCHAR(100) NOT NULL,
+    merk VARCHAR(100),
+    harga DECIMAL(10, 2),
+    stok INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ); 
