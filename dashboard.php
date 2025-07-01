@@ -353,7 +353,7 @@ $totalProduk = $pdo->query("SELECT COUNT(*) FROM produk")->fetchColumn();
 <body>
     <div class="topbar">
         <div class="logo">
-            <img src="logo_smk7.png" alt="Logo SMK 7 Baleendah">
+            <img src="logo_smk7baleendah.png" alt="Logo SMK 7 Baleendah">
             SIINBE
         </div>
         <button class="dark-toggle" id="darkToggle" title="Toggle dark mode"><span id="darkIcon">🌙</span></button>
@@ -369,7 +369,7 @@ $totalProduk = $pdo->query("SELECT COUNT(*) FROM produk")->fetchColumn();
     <div class="container">
         <nav class="sidebar">
             <div class="logo-wrap">
-                <img src="logo_smk7.png" alt="Logo SMK 7 Baleendah">
+                <img src="logo_smk7baleendah.png" alt="Logo SMK 7 Baleendah">
             </div>
             <ul>
                 <li class="active"><i class="fa fa-home"></i> Dasbor</li>

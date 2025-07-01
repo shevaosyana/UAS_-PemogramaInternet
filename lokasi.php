@@ -11,14 +11,83 @@ if (!isset($_SESSION['user_id'])) { header('Location: login.php'); exit(); }
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { margin: 0; padding: 0; font-family: 'Inter', Arial, sans-serif; background: #fff; color: #222; transition: background 0.3s, color 0.3s; }
+        body {
+            background: #f6f8fc;
+            font-family: 'Inter', Arial, sans-serif;
+            color: #222;
+        }
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+            background: linear-gradient(90deg, #667eea 60%, #764ba2 100%);
+            color: #fff;
+            padding: 0 36px;
+            box-shadow: 0 2px 8px rgba(102,126,234,0.08);
+        }
+        .container {
+            display: flex;
+            gap: 32px;
+            align-items: flex-start;
+            max-width: 1100px;
+            margin: 40px auto;
+        }
+        .content-card, .log-card, .calendar-card {
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 2px 10px rgba(102,126,234,0.06);
+            padding: 24px 32px 18px 32px;
+            margin-bottom: 24px;
+        }
+        h3, .card-header h3 {
+            color: #4b5bdc;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-top: 0;
+        }
+        .btn, .btn-edit, .btn-delete, .btn-add {
+            border-radius: 7px;
+            font-weight: 600;
+            font-family: inherit;
+            transition: background 0.18s, color 0.18s;
+        }
+        .btn-edit {
+            background: #ffe066;
+            color: #7c5c00;
+        }
+        .btn-edit:hover {
+            background: #ffd43b;
+            color: #5c4300;
+        }
+        .btn-delete {
+            background: #ff6b6b;
+            color: #fff;
+        }
+        .btn-delete:hover {
+            background: #fa5252;
+        }
+        .btn-add {
+            background: linear-gradient(90deg, #51cf66 60%, #40c057 100%);
+            color: #fff;
+        }
+        .btn-add:hover {
+            background: linear-gradient(90deg, #40c057 60%, #51cf66 100%);
+        }
+        .avatar {
+            background: #e0e7ff;
+            color: #4b5bdc;
+            font-weight: 700;
+        }
+        .users-table th {
+            background: #f6f6fa;
+            color: #444;
+            font-weight: 600;
+        }
         body.dark-mode { background: #181c24; color: #e2e6ef; }
-        .topbar { display: flex; align-items: center; justify-content: space-between; height: 54px; border-bottom: 1.5px solid #ececec; padding: 0 24px; background: #fff; position: sticky; top: 0; z-index: 10; transition: background 0.3s, color 0.3s; }
-        body.dark-mode .topbar { background: #23283a; color: #e2e6ef; border-bottom: 1.5px solid #23283a; }
         .logo { font-weight: 700; font-size: 1.18rem; letter-spacing: 1.5px; color: #4b5bdc; }
         .dark-toggle { background: none; border: none; color: #4b5bdc; font-size: 1.5rem; margin-right: 18px; cursor: pointer; transition: color 0.2s; }
         body.dark-mode .dark-toggle { color: #ffc107; }
-        .container { display: flex; min-height: calc(100vh - 54px); }
         .sidebar { width: 220px; background: #fff; border-right: 1.5px solid #ececec; padding: 18px 0 0 0; min-height: 100vh; transition: background 0.3s, color 0.3s; }
         body.dark-mode .sidebar { background: #23283a; color: #e2e6ef; border-right: 1.5px solid #23283a; }
         .sidebar .menu-group { margin-bottom: 18px; }
@@ -45,7 +114,7 @@ if (!isset($_SESSION['user_id'])) { header('Location: login.php'); exit(); }
     <div class="container">
         <nav class="sidebar">
             <div style="text-align:center;margin-bottom:18px;">
-                <img src="logo_smk7.png" alt="Logo SMK 7 Baleendah" style="height:60px;">
+                <img src="logo_smk7baleendah.png" alt="Logo SMK 7 Baleendah" style="height:60px;">
             </div>
             <div class="menu-group">
                 <div class="menu-title">Pengguna</div>
