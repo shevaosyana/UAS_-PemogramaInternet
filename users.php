@@ -24,7 +24,7 @@ $users = $stmt->fetchAll();
 $logList = $pdo->query("SELECT l.*, u.username FROM log_aktivitas l LEFT JOIN users u ON l.user_id = u.id ORDER BY l.waktu DESC LIMIT 5")->fetchAll();
 
 // Ambil produk dengan stok <= 3 (limit rendah) atau stok = 0 (habis)
-$produkLimit = $pdo->query("SELECT * FROM produk WHERE stok <= 3 ORDER BY stok ASC, nama ASC")->fetchAll();
+$produkLimit = $pdo->query("SELECT * FROM produk WHERE stok <= 3 ORDER BY stok ASC, id ASC")->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -319,6 +319,48 @@ $produkLimit = $pdo->query("SELECT * FROM produk WHERE stok <= 3 ORDER BY stok A
             color: #ffc107;
             border: 1.5px solid #ffc107;
         }
+        .btn-refresh {
+            background: #e0e7ff;
+            color: #4b5bdc;
+        }
+        .btn-refresh:hover {
+            background: #c7d2fe;
+            color: #222;
+        }
+        .btn-export {
+            background: #d1fae5;
+            color: #059669;
+        }
+        .btn-export:hover {
+            background: #a7f3d0;
+            color: #065f46;
+        }
+        .btn-print {
+            background: #ffe066;
+            color: #7c5c00;
+        }
+        .btn-print:hover {
+            background: #ffd43b;
+            color: #5c4300;
+        }
+        @media (max-width: 900px) {
+            .card-header div { flex-direction: column; gap: 6px; align-items: flex-end; }
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.97rem;
+            font-weight: 600;
+            color: #fff;
+            margin-right: 2px;
+        }
+        .badge-aktif {
+            background: #51cf66;
+        }
+        .badge-nonaktif {
+            background: #fa5252;
+        }
     </style>
 </head>
 <body>
@@ -367,9 +409,14 @@ $produkLimit = $pdo->query("SELECT * FROM produk WHERE stok <= 3 ORDER BY stok A
         <div class="content-card">
             <div class="card-header">
                 <h3>All Users</h3>
-                <a href="add_user.php" class="btn btn-add">
-                    <i class="fas fa-user-plus"></i> Add New User
-                </a>
+                <div style="display:flex; gap:8px; align-items:center;">
+                    <button class="btn btn-refresh" onclick="location.reload()"><i class="fa fa-rotate"></i> Refresh</button>
+                    <button class="btn btn-export" onclick="exportTableToCSV('users.csv')"><i class="fa fa-download"></i> Export to CSV</button>
+                    <button class="btn btn-print" onclick="printUsersTable()"><i class="fa fa-print"></i> Print Data</button>
+                    <a href="add_user.php" class="btn btn-add">
+                        <i class="fas fa-user-plus"></i> Add New User
+                    </a>
+                </div>
             </div>
             <div class="card-body">
                 <table class="users-table">
@@ -378,6 +425,10 @@ $produkLimit = $pdo->query("SELECT * FROM produk WHERE stok <= 3 ORDER BY stok A
                             <th>ID</th>
                             <th>Username</th>
                             <th>Email</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Dibuat</th>
+                            <th>Diupdate</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -390,6 +441,10 @@ $produkLimit = $pdo->query("SELECT * FROM produk WHERE stok <= 3 ORDER BY stok A
                                 <?php echo htmlspecialchars($user['username']); ?>
                             </td>
                             <td><?php echo htmlspecialchars($user['email'] ?? 'N/A'); ?></td>
+                            <td><?php echo htmlspecialchars($user['role']); ?></td>
+                            <td><?php echo htmlspecialchars($user['status']); ?></td>
+                            <td><?php echo htmlspecialchars($user['created_at']); ?></td>
+                            <td><?php echo htmlspecialchars($user['updated_at']); ?></td>
                             <td>
                                 <button class="btn btn-edit"><i class="fas fa-edit"></i> Edit</button>
                                 <button class="btn btn-delete" onclick="deleteUser(<?php echo $user['id']; ?>)"><i class="fas fa-trash"></i> Delete</button>
@@ -483,6 +538,42 @@ $produkLimit = $pdo->query("SELECT * FROM produk WHERE stok <= 3 ORDER BY stok A
     darkToggle.onclick = function() {
         setDarkMode(!document.body.classList.contains('dark-mode'));
     };
+    </script>
+    <script>
+    function exportTableToCSV(filename) {
+        var csv = [];
+        var rows = document.querySelectorAll(".users-table tr");
+        for (var i = 0; i < rows.length; i++) {
+            var row = [], cols = rows[i].querySelectorAll("td, th");
+            for (var j = 0; j < cols.length; j++)
+                row.push('"' + cols[j].innerText.replace(/\n/g, ' ').replace(/"/g, '""') + '"');
+            csv.push(row.join(","));
+        }
+        // Download CSV
+        var csvFile = new Blob([csv.join("\n")], { type: "text/csv" });
+        var downloadLink = document.createElement("a");
+        downloadLink.download = filename;
+        downloadLink.href = window.URL.createObjectURL(csvFile);
+        downloadLink.style.display = "none";
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+    }
+    function printUsersTable() {
+        var printContents = document.querySelector('.users-table').outerHTML;
+        var w = window.open('', '', 'height=700,width=900');
+        w.document.write('<html><head><title>Print Users</title>');
+        w.document.write('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>' +
+            '<style>body{font-family:Inter,Arial,sans-serif;}table{width:100%;border-collapse:collapse;}th,td{padding:10px 8px;text-align:left;}th{background:#f6f6fa;}tr:nth-child(even){background:#f9faff;}tr:hover{background:#e0e7ff;}@media print{.btn,.btn-add{display:none;}}</style>');
+        w.document.write('</head><body >');
+        w.document.write('<h2>Daftar Users</h2>');
+        w.document.write(printContents);
+        w.document.write('</body></html>');
+        w.document.close();
+        w.focus();
+        w.print();
+        w.close();
+    }
     </script>
 </div>
 </div>
