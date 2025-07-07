@@ -3,6 +3,8 @@ session_start();
 if (!isset($_SESSION['user_id'])) { header('Location: login.php'); exit(); }
 require_once 'config.php';
 
+$message = '';
+$success = false;
 // Proses tambah produk
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nama_produk'])) {
     $nama = trim($_POST['nama_produk']);
@@ -10,12 +12,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nama_produk'])) {
     $harga = isset($_POST['harga']) ? floatval($_POST['harga']) : null;
     $stok = isset($_POST['stok']) ? intval($_POST['stok']) : null;
     if ($nama !== '' && $merk !== '' && $harga !== null && $stok !== null) {
-        $stmt = $pdo->prepare("INSERT INTO produk (nama, merk, harga, stok) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$nama, $merk, $harga, $stok]);
-        header('Location: produk.php');
-        exit();
+        $stmt = $pdo->prepare("INSERT INTO produk (nama_produk, merk, harga, stok) VALUES (?, ?, ?, ?)");
+        if ($stmt->execute([$nama, $merk, $harga, $stok])) {
+            $message = 'Produk berhasil ditambahkan!';
+            $success = true;
+        } else {
+            $message = 'Gagal menambah produk.';
+            $success = false;
+        }
+    } else {
+        $message = 'Semua field harus diisi!';
+        $success = false;
     }
 }
+
+if (isset($_GET['delete'])) {
+    $id = intval($_GET['delete']);
+    $stmt = $pdo->prepare("DELETE FROM produk WHERE id = ?");
+    if ($stmt->execute([$id])) {
+        $message = 'Produk berhasil dihapus!';
+        $success = true;
+    } else {
+        $message = 'Gagal menghapus produk.';
+        $success = false;
+    }
+}
+
 $produkList = $pdo->query("SELECT * FROM produk ORDER BY id DESC")->fetchAll();
 ?>
 <!DOCTYPE html>
@@ -260,6 +282,24 @@ $produkList = $pdo->query("SELECT * FROM produk ORDER BY id DESC")->fetchAll();
         body.dark-mode tr:hover {
             background: #2d3350 !important;
         }
+        .notif {
+            padding: 12px 18px;
+            border-radius: 7px;
+            margin-bottom: 18px;
+            font-weight: 600;
+            font-size: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(102,126,234,0.08);
+            opacity: 1;
+            transition: opacity 0.5s;
+        }
+        .notif.hide {
+            opacity: 0;
+        }
+        .notif-success { background: #d4edda; color: #155724; border: 1.5px solid #51cf66; }
+        .notif-error { background: #f8d7da; color: #721c24; border: 1.5px solid #ff6b6b; }
+        body.dark-mode .notif-success { background: #223a2a; color: #51cf66; border-color: #51cf66; }
+        body.dark-mode .notif-error { background: #3a2222; color: #ff6b6b; border-color: #ff6b6b; }
     </style>
 </head>
 <body>
@@ -278,6 +318,11 @@ $produkList = $pdo->query("SELECT * FROM produk ORDER BY id DESC")->fetchAll();
             <button class="dark-toggle" id="darkToggle" title="Toggle dark mode"><span id="darkIcon">🌙</span></button>
         </div>
         <div class="card">
+            <?php if ($message): ?>
+                <div class="notif <?= $success ? 'notif-success' : 'notif-error' ?>" id="notifProduk">
+                    <?= htmlspecialchars($message) ?>
+                </div>
+            <?php endif; ?>
             <form class="form-produk" method="post" autocomplete="off">
                 <input type="text" name="nama_produk" placeholder="Nama Produk" required />
                 <input type="text" name="merk" placeholder="Merk" required />
@@ -306,14 +351,14 @@ $produkList = $pdo->query("SELECT * FROM produk ORDER BY id DESC")->fetchAll();
                         <?php foreach($produkList as $i => $p): ?>
                         <tr>
                             <td><?= $i+1 ?></td>
-                            <td><?= htmlspecialchars($p['nama']) ?></td>
+                            <td><?= htmlspecialchars($p['nama_produk']) ?></td>
                             <td><?= htmlspecialchars($p['merk']) ?></td>
                             <td><?= number_format($p['harga'],0,',','.') ?></td>
                             <td><?= htmlspecialchars($p['stok']) ?></td>
                             <td><?= isset($p['created_at']) ? htmlspecialchars($p['created_at']) : '-' ?></td>
                             <td>
                                 <button class="btn-aksi btn-edit" title="Edit"><i class="fa fa-edit"></i></button>
-                                <button class="btn-aksi btn-delete" title="Hapus"><i class="fa fa-trash"></i></button>
+                                <a href="produk.php?delete=<?= $p['id'] ?>" onclick="return confirm('Yakin ingin menghapus produk ini?')" class="btn-aksi btn-delete" title="Hapus"><i class="fa fa-trash"></i></a>
                             </td>
                         </tr>
                         <?php endforeach; ?>
@@ -340,6 +385,14 @@ $produkList = $pdo->query("SELECT * FROM produk ORDER BY id DESC")->fetchAll();
     darkToggle.onclick = function() {
         setDarkMode(!document.body.classList.contains('dark-mode'));
     };
+    if (document.getElementById('notifProduk')) {
+        setTimeout(function() {
+            document.getElementById('notifProduk').classList.add('hide');
+        }, 2500);
+        setTimeout(function() {
+            document.getElementById('notifProduk').style.display = 'none';
+        }, 3000);
+    }
     </script>
 </body>
 </html> 
