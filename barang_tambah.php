@@ -1,34 +1,28 @@
 <?php
-header('Content-Type: application/json');
-session_start();
-if (!isset($_SESSION['user_id'])) {
-    echo json_encode(['success' => false, 'message' => 'Unauthorized']);
-    exit();
-}
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
 require_once 'config.php';
+header('Content-Type: application/json');
 
-// Ambil data dari POST
-$nama = isset($_POST['nama']) ? trim($_POST['nama']) : '';
-$lokasi = isset($_POST['lokasi']) ? trim($_POST['lokasi']) : '';
-$merk = isset($_POST['merk']) ? trim($_POST['merk']) : '';
-$status = isset($_POST['status']) ? trim($_POST['status']) : '';
-$nomor = isset($_POST['nomor']) ? trim($_POST['nomor']) : '';
+$nama   = $_POST['nama'] ?? '';
+$lokasi = $_POST['lokasi'] ?? '';
+$merk   = $_POST['merk'] ?? '';
+$status = $_POST['status'] ?? '';
+$nomor  = $_POST['nomor'] ?? '';
 
-if ($nama === '' || $lokasi === '' || $merk === '' || $status === '' || $nomor === '') {
-    echo json_encode(['success' => false, 'message' => 'Semua field wajib diisi']);
-    exit();
-}
-
-try {
+if ($nama && $lokasi && $merk && $status && $nomor) {
     $stmt = $pdo->prepare("INSERT INTO barang (nama, lokasi, merk, status, nomor) VALUES (?, ?, ?, ?, ?)");
-    $stmt->execute([$nama, $lokasi, $merk, $status, $nomor]);
-    // Catat log aktivitas
-    if (isset($_SESSION['user_id'])) {
-        catat_log($pdo, $_SESSION['user_id'], "Menambahkan barang $nama");
+    if ($stmt->execute([$nama, $lokasi, $merk, $status, $nomor])) {
+        echo json_encode(['success' => true]);
+        exit;
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Gagal insert ke database']);
+        exit;
     }
-    echo json_encode(['success' => true, 'message' => 'Barang berhasil ditambahkan']);
-} catch (Exception $e) {
-    echo json_encode(['success' => false, 'message' => 'Gagal menambah barang: ' . $e->getMessage()]);
+} else {
+    echo json_encode(['success' => false, 'message' => 'Data tidak lengkap']);
+    exit;
 }
 
 // Ambil data barang dari database
@@ -97,4 +91,29 @@ $produkList = $pdo->query("SELECT * FROM produk")->fetchAll();
         </tr>
         <?php endforeach; ?>
     </tbody>
-</table> 
+</table>
+
+<?php if (isset($_GET['msg']) && $_GET['msg'] == 'tambah_sukses'): ?>
+    <div class="notif notif-success" id="notifBarang">Barang berhasil ditambahkan!</div>
+<?php elseif (isset($_GET['msg']) && $_GET['msg'] == 'tambah_gagal'): ?>
+    <div class="notif notif-error" id="notifBarang">Gagal menambahkan barang!</div>
+<?php endif; ?> 
+
+<style>
+.notif {
+    padding: 12px 18px;
+    border-radius: 7px;
+    margin-bottom: 18px;
+    font-weight: 600;
+    font-size: 1rem;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(102,126,234,0.08);
+    opacity: 1;
+    transition: opacity 0.5s;
+}
+.notif.hide { opacity: 0; }
+.notif-success { background: #d4edda; color: #155724; border: 1.5px solid #51cf66; }
+.notif-error { background: #f8d7da; color: #721c24; border: 1.5px solid #ff6b6b; }
+body.dark-mode .notif-success { background: #223a2a; color: #51cf66; border-color: #51cf66; }
+body.dark-mode .notif-error { background: #3a2222; color: #ff6b6b; border-color: #ff6b6b; }
+</style> 

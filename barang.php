@@ -2,6 +2,17 @@
 session_start();
 if (!isset($_SESSION['user_id'])) { header('Location: login.php'); exit(); }
 require_once 'config.php';
+if (isset($_GET['delete'])) {
+    $id = intval($_GET['delete']);
+    $stmt = $pdo->prepare("DELETE FROM barang WHERE id = ?");
+    if ($stmt->execute([$id])) {
+        header('Location: barang.php?msg=hapus_sukses');
+        exit();
+    } else {
+        header('Location: barang.php?msg=hapus_gagal');
+        exit();
+    }
+}
 // Ambil data barang dari database
 $stmt = $pdo->query("SELECT * FROM barang ORDER BY id DESC");
 $daftar_barang = $stmt->fetchAll();
@@ -133,40 +144,89 @@ $daftar_barang = $stmt->fetchAll();
         }
         table.barang-table {
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0;
             margin-top: 8px;
+            background: #f8fafc;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(102,126,234,0.08);
         }
         table.barang-table th, table.barang-table td {
-            padding: 10px 8px;
+            padding: 13px 10px;
             text-align: left;
-            font-size: 0.98rem;
+            font-size: 1rem;
         }
         table.barang-table th {
-            background: #f6f6fa;
+            background: #4b5bdc;
+            color: #fff;
+            font-weight: 700;
+            border-bottom: 2.5px solid #ececec;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+        table.barang-table tr:nth-child(even) td {
+            background: #eef1fa;
+        }
+        table.barang-table tr:nth-child(odd) td {
+            background: #f8fafc;
+        }
+        table.barang-table tr:hover td {
+            background: #dbeafe !important;
+            transition: background 0.2s;
+        }
+        body.dark-mode table.barang-table th {
+            background: #23283a;
+            color: #ffc107;
+            border-bottom: 2.5px solid #23283a;
+        }
+        body.dark-mode table.barang-table tr:nth-child(even) td {
+            background: #23283a;
+        }
+        body.dark-mode table.barang-table tr:nth-child(odd) td {
+            background: #181c24;
+        }
+        body.dark-mode table.barang-table tr:hover td {
+            background: #2d3350 !important;
+        }
+        .badge-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.97rem;
             font-weight: 600;
-            color: #444;
-            border-bottom: 1.5px solid #ececec;
+            color: #fff;
         }
-        table.barang-table td {
-            border-bottom: 1px solid #f0f0f0;
-        }
-        table.barang-table tr:last-child td {
-            border-bottom: none;
-        }
+        .badge-aktif { background: #28a745; }
+        .badge-servis { background: #ffc107; color: #222; }
+        .badge-rusak { background: #dc3545; }
+        .badge-rusak-ringan { background: #ff9800; color: #fff; }
+        body.dark-mode .badge-rusak-ringan { background: #ff9800; color: #fff; }
         .table-actions {
             display: flex;
-            gap: 8px;
+            gap: 10px;
         }
         .table-actions button {
             background: none;
             border: none;
-            color: #667eea;
-            font-size: 1.1rem;
+            color: #4b5bdc;
+            font-size: 1.2rem;
             cursor: pointer;
-            transition: color 0.2s;
+            border-radius: 6px;
+            padding: 6px 8px;
+            transition: background 0.18s, color 0.18s;
         }
         .table-actions button:hover {
-            color: #4b5bdc;
+            background: #e0e7ff;
+            color: #222;
+        }
+        body.dark-mode .table-actions button {
+            color: #ffc107;
+        }
+        body.dark-mode .table-actions button:hover {
+            background: #2d3350;
+            color: #fff;
         }
         .table-footer {
             display: flex;
@@ -198,6 +258,13 @@ $daftar_barang = $stmt->fetchAll();
             font-weight: 600;
             font-size: 1.08rem;
             color: #4b5bdc;
+        }
+        body.dark-mode .qr-card {
+            background: #23283a;
+            color: #e2e6ef;
+        }
+        body.dark-mode .qr-desc {
+            color: #b3bafc;
         }
         #barcodeStatic {
             width: 120px;
@@ -232,6 +299,66 @@ $daftar_barang = $stmt->fetchAll();
             background: linear-gradient(90deg, #4b5bdc 60%, #764ba2 100%);
             box-shadow: 0 4px 16px rgba(102,126,234,0.13);
         }
+        body.dark-mode .scan-btn {
+            background: linear-gradient(90deg, #4b5bdc 60%, #667eea 100%);
+            color: #fff;
+        }
+        body.dark-mode .scan-btn:hover {
+            background: linear-gradient(90deg, #667eea 60%, #764ba2 100%);
+        }
+        .searchbar, .barang-table-tools .search {
+            display: flex;
+            align-items: center;
+            background: #f6f6fa;
+            border-radius: 20px;
+            padding: 0 12px;
+            border: 1.2px solid #ececec;
+        }
+        .searchbar input, .barang-table-tools input[type="text"] {
+            border: none;
+            background: transparent;
+            outline: none;
+            padding: 7px 6px 7px 0;
+            font-size: 1rem;
+            width: 120px;
+            color: #222;
+        }
+        .searchbar i, .barang-table-tools i {
+            color: #b3b3b3;
+            font-size: 1rem;
+        }
+        body.dark-mode .searchbar, body.dark-mode .barang-table-tools .search {
+            background: #181c24;
+            border: 1.2px solid #444;
+        }
+        body.dark-mode .searchbar input, body.dark-mode .barang-table-tools input[type="text"] {
+            color: #e2e6ef;
+        }
+        body.dark-mode .searchbar i, body.dark-mode .barang-table-tools i {
+            color: #e2e6ef;
+        }
+        .barang-table-tools button {
+            background: none;
+            border: none;
+            color: #667eea;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+        body.dark-mode .barang-table-tools button {
+            color: #b3bafc;
+        }
+        .table-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 18px 0 18px;
+            font-size: 0.97rem;
+            color: #888;
+        }
+        body.dark-mode .table-footer {
+            background: #23283a;
+            color: #e2e6ef;
+        }
         .modal-qr {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -253,6 +380,60 @@ $daftar_barang = $stmt->fetchAll();
             flex-direction: column;
             align-items: center;
         }
+        body.dark-mode .modal-qr-content {
+            background: #23283a;
+            color: #e2e6ef;
+        }
+        .modal-qr-content h2 {
+            color: #4b5bdc;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 18px;
+        }
+        body.dark-mode .modal-qr-content h2 {
+            color: #ffc107;
+        }
+        .modal-qr-content label {
+            color: #222;
+            font-weight: 600;
+        }
+        body.dark-mode .modal-qr-content label {
+            color: #e2e6ef;
+        }
+        .modal-qr-content input,
+        .modal-qr-content select {
+            background: #fff;
+            color: #222;
+            border: 1px solid #ececec;
+        }
+        body.dark-mode .modal-qr-content input,
+        body.dark-mode .modal-qr-content select {
+            background: #181c24;
+            color: #e2e6ef;
+            border: 1.5px solid #444;
+        }
+        .modal-qr-content button[type="submit"] {
+            background: linear-gradient(90deg, #667eea 60%, #764ba2 100%);
+            color: #fff;
+            border: none;
+            border-radius: 7px;
+            padding: 10px 22px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.18s;
+        }
+        .modal-qr-content button[type="submit"]:hover {
+            background: linear-gradient(90deg, #4b5bdc 60%, #667eea 100%);
+        }
+        body.dark-mode .modal-qr-content button[type="submit"] {
+            background: linear-gradient(90deg, #ffc107 60%, #4b5bdc 100%);
+            color: #23283a;
+        }
+        body.dark-mode .modal-qr-content button[type="submit"]:hover {
+            background: linear-gradient(90deg, #ffe066 60%, #ffc107 100%);
+            color: #23283a;
+        }
         .close-modal {
             position: absolute;
             top: 12px;
@@ -269,6 +450,63 @@ $daftar_barang = $stmt->fetchAll();
             color: #222;
             font-weight: 600;
             text-align: center;
+        }
+        .notif {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 14px 28px;
+            border-radius: 10px;
+            margin-bottom: 22px;
+            font-weight: 600;
+            font-size: 1.08rem;
+            text-align: center;
+            box-shadow: 0 4px 24px rgba(102,126,234,0.13);
+            opacity: 1;
+            transition: opacity 0.5s, transform 0.5s;
+            transform: translateY(-20px);
+            animation: notifIn 0.5s cubic-bezier(.4,2,.6,1) 1;
+        }
+        @keyframes notifIn {
+            from { opacity: 0; transform: translateY(-40px); }
+            to { opacity: 1; transform: translateY(-20px); }
+        }
+        .notif.hide {
+            opacity: 0;
+            transform: translateY(-40px);
+        }
+        .notif-success {
+            background: linear-gradient(90deg, #d4edda 60%, #b7f5c2 100%);
+            color: #155724;
+            border: 1.5px solid #51cf66;
+        }
+        .notif-error {
+            background: linear-gradient(90deg, #f8d7da 60%, #ffd6d6 100%);
+            color: #721c24;
+            border: 1.5px solid #ff6b6b;
+        }
+        body.dark-mode .notif-success {
+            background: linear-gradient(90deg, #223a2a 60%, #2e5c3a 100%);
+            color: #51cf66;
+            border-color: #51cf66;
+        }
+        body.dark-mode .notif-error {
+            background: linear-gradient(90deg, #3a2222 60%, #5c2e2e 100%);
+            color: #ff6b6b;
+            border-color: #ff6b6b;
+        }
+        .notif .notif-icon {
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .notif-success .notif-icon {
+            color: #28a745;
+        }
+        .notif-error .notif-icon {
+            color: #dc3545;
         }
     </style>
 </head>
@@ -356,6 +594,7 @@ $daftar_barang = $stmt->fetchAll();
                             <select name="status" required style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid #ececec;">
                                 <option value="Aktif">Aktif</option>
                                 <option value="Perlu Servis">Perlu Servis</option>
+                                <option value="Rusak Ringan">Rusak Ringan</option>
                                 <option value="Rusak">Rusak</option>
                             </select>
                         </div>
@@ -400,18 +639,22 @@ $daftar_barang = $stmt->fetchAll();
         <td><?= htmlspecialchars($b['merk']) ?></td>
         <td>
             <?php if ($b['status'] == 'Aktif'): ?>
-                <span style="color:#28a745;font-weight:600;">Aktif</span>
+                <span class="badge-status badge-aktif">Aktif</span>
             <?php elseif ($b['status'] == 'Perlu Servis'): ?>
-                <span style="color:#ffc107;font-weight:600;">Perlu Servis</span>
+                <span class="badge-status badge-servis">Perlu Servis</span>
+            <?php elseif ($b['status'] == 'Rusak Ringan'): ?>
+                <span class="badge-status badge-rusak-ringan">Rusak Ringan</span>
             <?php else: ?>
-                <span style="color:#dc3545;font-weight:600;"><?= htmlspecialchars($b['status']) ?></span>
+                <span class="badge-status badge-rusak"><?= htmlspecialchars($b['status']) ?></span>
             <?php endif; ?>
         </td>
         <td><?= htmlspecialchars($b['nomor']) ?></td>
         <td class="table-actions">
             <button title="Lihat Barcode" onclick="showBarcode('<?= htmlspecialchars($b['nomor']) ?>','<?= htmlspecialchars($b['nama']) ?>')"><i class="fa fa-qrcode"></i></button>
             <button title="Edit"><i class="fa fa-edit"></i></button>
-            <button title="Delete"><i class="fa fa-trash"></i></button>
+            <a href="barang.php?delete=<?= $b['id'] ?>" onclick="return confirm('Yakin ingin menghapus barang ini?')">
+                <i class="fa fa-trash"></i>
+            </a>
         </td>
     </tr>
 <?php endforeach; ?>
@@ -528,7 +771,7 @@ $daftar_barang = $stmt->fetchAll();
                 alert('Barang berhasil ditambahkan!');
                 closeTambahBarang();
                 form.reset();
-                location.reload(); // reload agar data baru muncul di tabel
+                location.reload();
             } else {
                 alert('Gagal menambah barang: ' + res.message);
             }
@@ -555,6 +798,19 @@ $daftar_barang = $stmt->fetchAll();
     darkToggle.onclick = function() {
         setDarkMode(!document.body.classList.contains('dark-mode'));
     };
+    function hapusBarang(id) {
+        if (confirm('Yakin ingin menghapus barang ini?')) {
+            window.location = 'barang.php?delete=' + id;
+        }
+    }
+    if (document.getElementById('notifBarang')) {
+        setTimeout(function() {
+            document.getElementById('notifBarang').classList.add('hide');
+        }, 2500);
+        setTimeout(function() {
+            document.getElementById('notifBarang').style.display = 'none';
+        }, 3000);
+    }
     </script>
 </body>
 </html> 
