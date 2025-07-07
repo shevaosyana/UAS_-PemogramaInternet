@@ -508,6 +508,31 @@ $daftar_barang = $stmt->fetchAll();
         .notif-error .notif-icon {
             color: #dc3545;
         }
+        .footer-siinbe {
+            width: 100%;
+            background: #f6f8fc;
+            color: #222;
+            text-align: center;
+            padding: 22px 8px 18px 8px;
+            font-size: 1rem;
+            border-top: 1.5px solid #ececec;
+            margin-top: 38px;
+        }
+        .footer-siinbe .footer-title {
+            font-weight: 700;
+            font-size: 1.13rem;
+            color: #4b5bdc;
+            margin-bottom: 4px;
+        }
+        .footer-siinbe a { color: #4b5bdc; text-decoration: none; }
+        .footer-siinbe a:hover { text-decoration: underline; }
+        body.dark-mode .footer-siinbe {
+            background: #23283a;
+            color: #e2e6ef;
+            border-top: 1.5px solid #23283a;
+        }
+        body.dark-mode .footer-siinbe .footer-title { color: #ffc107; }
+        body.dark-mode .footer-siinbe a { color: #ffc107; }
     </style>
 </head>
 <body>

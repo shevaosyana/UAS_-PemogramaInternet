@@ -1,6 +1,6 @@
 <?php
 $host = 'localhost';
-$dbname = 'login_db';
+$dbname = 'login_db'; // Ganti sesuai nama database kamu
 $username = 'root';
 $password = '';
 
@@ -9,10 +9,12 @@ try {
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch(PDOException $e) {
     echo "Connection failed: " . $e->getMessage();
+    exit;
 }
 
+// Fungsi logging aktivitas (opsional)
 function catat_log($pdo, $user_id, $aktivitas) {
     $stmt = $pdo->prepare("INSERT INTO log_aktivitas (user_id, aktivitas) VALUES (?, ?)");
     $stmt->execute([$user_id, $aktivitas]);
 }
-?> 
+?>
