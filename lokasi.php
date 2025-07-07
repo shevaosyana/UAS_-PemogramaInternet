@@ -3,6 +3,15 @@ session_start();
 if (!isset($_SESSION['user_id'])) { header('Location: login.php'); exit(); }
 require_once 'config.php';
 
+// Proses hapus lokasi
+if (isset($_GET['delete'])) {
+    $id = intval($_GET['delete']);
+    $stmt = $pdo->prepare("DELETE FROM lokasi WHERE id = ?");
+    $stmt->execute([$id]);
+    header('Location: lokasi.php');
+    exit();
+}
+
 // Proses tambah lokasi
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nama_lokasi'])) {
     $nama = trim($_POST['nama_lokasi']);
@@ -326,7 +335,9 @@ $lokasiList = $pdo->query("SELECT * FROM lokasi ORDER BY id DESC")->fetchAll();
                             <td><?= isset($l['catatan']) && $l['catatan'] !== null ? htmlspecialchars($l['catatan']) : '-' ?></td>
                             <td>
                                 <button class="btn-aksi btn-edit" title="Edit"><i class="fa fa-edit"></i></button>
-                                <button class="btn-aksi btn-delete" title="Hapus"><i class="fa fa-trash"></i></button>
+                                <a href="lokasi.php?delete=<?= $l['id'] ?>" class="btn-aksi btn-delete" title="Hapus" onclick="return confirm('Yakin ingin menghapus data ini?')">
+                                    <i class="fa fa-trash"></i>
+                                </a>
                             </td>
                         </tr>
                         <?php endforeach; ?>
@@ -334,6 +345,7 @@ $lokasiList = $pdo->query("SELECT * FROM lokasi ORDER BY id DESC")->fetchAll();
                 </tbody>
             </table>
         </div>
+        <a href="cetak_lokasi.php" target="_blank" class="btn-aksi">Cetak Lokasi</a>
     </div>
     <script>
     const darkToggle = document.getElementById('darkToggle');

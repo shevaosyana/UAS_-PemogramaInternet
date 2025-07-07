@@ -366,6 +366,8 @@ $produkList = $pdo->query("SELECT * FROM produk ORDER BY id DESC")->fetchAll();
                 </tbody>
             </table>
         </div>
+        <a href="cetak_produk.php" target="_blank" class="btn-aksi">Cetak Produk</a>
+        <a href="cetak_lokasi.php" target="_blank" class="btn-aksi">Cetak Lokasi</a>
     </div>
     <script>
     const darkToggle = document.getElementById('darkToggle');
