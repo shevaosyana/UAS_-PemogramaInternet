@@ -1,39 +1,27 @@
 <?php
-session_start();
-
-// Check if user is logged in
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit();
-}
 require_once 'config.php';
-// Query data untuk grafik
-// Barang per lokasi
-$barangPerLokasi = $pdo->query("SELECT lokasi, COUNT(*) as jumlah FROM barang GROUP BY lokasi ORDER BY jumlah DESC")->fetchAll();
-// Jenis barang terbanyak (berdasarkan nama)
-$jenisBarang = $pdo->query("SELECT nama, COUNT(*) as jumlah FROM barang GROUP BY nama ORDER BY jumlah DESC LIMIT 5")->fetchAll();
-// Untuk pencarian cepat
-$allBarang = $pdo->query("SELECT nama FROM barang")->fetchAll(PDO::FETCH_COLUMN);
-$allLokasi = $pdo->query("SELECT nama FROM lokasi")->fetchAll(PDO::FETCH_COLUMN);
-// Log aktivitas terbaru
-$logList = $pdo->query("
-    SELECT l.*, u.username 
-    FROM log_aktivitas l 
-    LEFT JOIN users u ON l.user_id = u.id 
-    ORDER BY l.waktu DESC 
-    LIMIT 10
-")->fetchAll();
-// Statistik ringkasan
-$totalBarang = $pdo->query("SELECT COUNT(*) FROM barang")->fetchColumn();
-$totalLokasi = $pdo->query("SELECT COUNT(*) FROM lokasi")->fetchColumn();
-$totalProduk = $pdo->query("SELECT COUNT(*) FROM produk")->fetchColumn();
+// session_start();
+// if (!isset($_SESSION['user_id'])) {
+//     header("Location: login.php");
+//     exit();
+// }
+// error_reporting(E_ALL);
+// ini_set('display_errors', 1);
+$totalBarang = $totalBarang ?? 0;
+$totalLokasi = $totalLokasi ?? 0;
+$totalProduk = $totalProduk ?? 0;
+$barangPerLokasi = $barangPerLokasi ?? [];
+$jenisBarang = $jenisBarang ?? [];
+$allBarang = $allBarang ?? [];
+$allLokasi = $allLokasi ?? [];
+$logList = $logList ?? [];
 ?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIINBE - Dasbor</title>
+    <title>Dashboard - SIINBE</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -45,12 +33,14 @@ $totalProduk = $pdo->query("SELECT COUNT(*) FROM produk")->fetchColumn();
             background: #f6f8fc;
             color: #222;
             transition: background 0.3s, color 0.3s;
+            overflow-x: hidden;
         }
         body.dark-mode {
             background: #181c24;
             color: #e2e6ef;
         }
         .topbar {
+            width: 100vw;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -58,8 +48,11 @@ $totalProduk = $pdo->query("SELECT COUNT(*) FROM produk")->fetchColumn();
             background: linear-gradient(90deg, #667eea 60%, #764ba2 100%);
             color: #fff;
             padding: 0 36px;
-            box-shadow: 0 2px 8px rgba(102,126,234,0.08);
-            position: relative;
+            box-sizing: border-box;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
         }
         .topbar .logo {
             display: flex;
@@ -144,16 +137,16 @@ $totalProduk = $pdo->query("SELECT COUNT(*) FROM produk")->fetchColumn();
         }
         .container {
             display: flex;
+            margin-top: 64px; /* agar tidak ketutup topbar */
             min-height: calc(100vh - 64px);
         }
         .sidebar {
-            width: 230px;
+            width: 220px;
             background: #fff;
             border-right: 1.5px solid #ececec;
-            min-height: 100vh;
+            min-height: calc(100vh - 64px);
             box-shadow: 2px 0 8px rgba(102,126,234,0.04);
             padding-top: 24px;
-            transition: background 0.3s, color 0.3s;
         }
         body.dark-mode .sidebar {
             background: #23283a;
@@ -174,6 +167,7 @@ $totalProduk = $pdo->query("SELECT COUNT(*) FROM produk")->fetchColumn();
             list-style: none;
             padding: 0;
             margin: 0;
+            width: 100%;
         }
         .sidebar li {
             display: flex;
@@ -203,7 +197,9 @@ $totalProduk = $pdo->query("SELECT COUNT(*) FROM produk")->fetchColumn();
         }
         .main-content {
             flex: 1;
-            padding: 48px 56px 0 56px;
+            padding: 32px 24px;
+            min-width: 0;
+            background: #f6f8fc;
             transition: color 0.3s;
         }
         .main-content h1 {
@@ -249,13 +245,43 @@ $totalProduk = $pdo->query("SELECT COUNT(*) FROM produk")->fetchColumn();
             color: #ffc107;
         }
         @media (max-width: 900px) {
-            .container { flex-direction: column; }
-            .sidebar { width: 100vw; min-height: auto; }
-            .main-content { padding: 24px 4vw 0 4vw; }
+            .container {
+                flex-direction: column;
+                max-width: 100vw;
+            }
+            .sidebar {
+                width: 100vw;
+                min-width: 0;
+                border-right: none;
+                border-bottom: 1.5px solid #ececec;
+                min-height: unset;
+                box-shadow: none;
+                flex-direction: row;
+                align-items: flex-start;
+                justify-content: flex-start;
+            }
+            .sidebar ul {
+                display: flex;
+                flex-direction: row;
+                width: 100vw;
+            }
+            .sidebar li {
+                flex: 1;
+                padding: 12px 0;
+                justify-content: center;
+            }
+            .main-content {
+                padding: 18px 6vw;
+            }
             .dashboard-charts { flex-direction: column; gap: 18px; }
         }
         @media (max-width: 600px) {
-            .main-content { padding: 12px 2vw 0 2vw; }
+            .main-content {
+                padding: 10px 2vw;
+            }
+            .sidebar {
+                padding-top: 10px;
+            }
             .dashboard-charts { flex-direction: column; gap: 12px; }
             .chart-card { min-width: 0; max-width: 100vw; padding: 12px 4px 10px 4px; }
             .sidebar { padding-top: 8px; }
@@ -363,21 +389,21 @@ $totalProduk = $pdo->query("SELECT COUNT(*) FROM produk")->fetchColumn();
             <div id="quickSearchResults" class="search-results"></div>
         </form>
         <div class="user-info">
-            <i class="fa fa-user-circle"></i> Halo, <b><?= htmlspecialchars($_SESSION['username']) ?></b>
+            <i class="fa fa-user-circle"></i> Halo, Admin
         </div>
     </div>
     <div class="container">
-        <nav class="sidebar">
+        <div class="sidebar">
             <div class="logo-wrap">
                 <img src="logo_smk7baleendah.png" alt="Logo SMK 7 Baleendah">
             </div>
             <ul>
-                <li class="active"><i class="fa fa-home"></i> Dasbor</li>
+                <li onclick="window.location='users.php'" class="active"><i class="fa fa-user"></i> Pengguna</li>
                 <li onclick="window.location='barang.php'"><i class="fa fa-box"></i> Barang</li>
                 <li onclick="window.location='lokasi.php'"><i class="fa fa-location-dot"></i> Lokasi</li>
                 <li onclick="window.location='produk.php'"><i class="fa fa-bookmark"></i> Produk</li>
-                </ul>
-        </nav>
+            </ul>
+        </div>
         <main class="main-content">
             <h1>Dasbor</h1>
             <div class="statistik-ringkasan">
@@ -414,7 +440,7 @@ $totalProduk = $pdo->query("SELECT COUNT(*) FROM produk")->fetchColumn();
                     <?php foreach($logList as $log): ?>
                     <li>
                         <span class="log-time"><?= date('d/m H:i', strtotime($log['waktu'])) ?></span>
-                        <b><?= htmlspecialchars($log['username']) ?></b> <?= htmlspecialchars($log['aktivitas']) ?>
+                        <b><?= isset($log['username']) && $log['username'] ? htmlspecialchars($log['username']) : 'Admin' ?></b> <?= htmlspecialchars($log['aktivitas']) ?>
                     </li>
                     <?php endforeach; ?>
                 </ul>
