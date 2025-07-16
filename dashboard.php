@@ -377,76 +377,38 @@ $logList = $logList ?? [];
     </style>
 </head>
 <body>
-    <div class="topbar">
-        <div class="logo">
-            <img src="logo_smk7baleendah.png" alt="Logo SMK 7 Baleendah">
-            SIINBE
-        </div>
-        <button class="dark-toggle" id="darkToggle" title="Toggle dark mode"><span id="darkIcon">🌙</span></button>
-        <form class="quick-search" action="#" method="get" autocomplete="off" onsubmit="return false;">
-            <input type="text" id="quickSearchInput" placeholder="Cari barang/lokasi..." />
-            <button type="submit"><i class="fa fa-search"></i></button>
-            <div id="quickSearchResults" class="search-results"></div>
-        </form>
-        <div class="user-info">
-            <i class="fa fa-user-circle"></i> Halo, Admin
-        </div>
+<div class="container-dashboard">
+  <aside class="sidebar">
+    <div class="logo">
+      <img src="logo_smk7baleendah.png" alt="Logo" />
     </div>
-    <div class="container">
-        <div class="sidebar">
-            <div class="logo-wrap">
-                <img src="logo_smk7baleendah.png" alt="Logo SMK 7 Baleendah">
-            </div>
-            <ul>
-                <li onclick="window.location='users.php'" class="active"><i class="fa fa-user"></i> Pengguna</li>
-                <li onclick="window.location='barang.php'"><i class="fa fa-box"></i> Barang</li>
-                <li onclick="window.location='lokasi.php'"><i class="fa fa-location-dot"></i> Lokasi</li>
-                <li onclick="window.location='produk.php'"><i class="fa fa-bookmark"></i> Produk</li>
-            </ul>
-        </div>
-        <main class="main-content">
-            <h1>Dasbor</h1>
-            <div class="statistik-ringkasan">
-                <div class="stat-card">
-                    <div class="stat-title">Total Barang</div>
-                    <div class="stat-value"><?= $totalBarang ?></div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-title">Total Lokasi</div>
-                    <div class="stat-value"><?= $totalLokasi ?></div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-title">Kategori Produk</div>
-                    <div class="stat-value"><?= $totalProduk ?></div>
-                </div>
-            </div>
-            <div style="background:#fff;border-radius:14px;box-shadow:0 2px 10px rgba(102,126,234,0.06);padding:32px 28px;max-width:600px;">
-                <h2 style="margin-top:0;color:#222;font-size:1.3rem;font-weight:600;">APLIKASI INVENTARIS BARANG</h2>
-                <p style="color:#555;font-size:1.08rem;">SMK NEGERI 7 BALEENDAH</p>
-            </div>
-            <div class="dashboard-charts">
-                <div class="chart-card">
-                    <canvas id="chartLokasi" width="340" height="220"></canvas>
-                    <div class="chart-title">Barang per Lokasi</div>
-                </div>
-                <div class="chart-card">
-                    <canvas id="chartJenis" width="340" height="220"></canvas>
-                    <div class="chart-title">Jenis Barang Terbanyak</div>
-                </div>
-            </div>
-            <div class="log-card">
-                <h3>Log Aktivitas Terbaru</h3>
-                <ul>
-                    <?php foreach($logList as $log): ?>
-                    <li>
-                        <span class="log-time"><?= date('d/m H:i', strtotime($log['waktu'])) ?></span>
-                        <b><?= isset($log['username']) && $log['username'] ? htmlspecialchars($log['username']) : 'Admin' ?></b> <?= htmlspecialchars($log['aktivitas']) ?>
-                    </li>
-                    <?php endforeach; ?>
-                </ul>
-            </div>
-        </main>
+    <nav>
+      <ul>
+        <li class="active"><span class="icon">🏠</span> Dasbor</li>
+        <li><span class="icon">💼</span> Barang</li>
+        <li><span class="icon">📍</span> Lokasi</li>
+        <li><span class="icon">🏷️</span> Produk</li>
+      </ul>
+    </nav>
+  </aside>
+  <main class="main-content">
+    <h1>Dasbor</h1>
+    <div class="summary-cards">
+      <div class="card">
+        <div class="card-title">Total Barang</div>
+        <div class="card-value">1</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Total Lokasi</div>
+        <div class="card-value">0</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Kategori Produk</div>
+        <div class="card-value">0</div>
+      </div>
     </div>
+  </main>
+</div>
     <script>
     // Chart.js Barang per Lokasi
     const lokasiLabels = <?= json_encode(array_column($barangPerLokasi, 'lokasi')) ?>;
