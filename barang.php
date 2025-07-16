@@ -547,13 +547,14 @@ $daftar_barang = $stmt->fetchAll();
             </div>
         </nav>
         <main class="main-content">
+            <!-- Hanya konten barang, tanpa dashboard mini -->
+            <button class="add-btn" style="margin-bottom: 18px;"><i class="fa fa-plus"></i>Tambah</button>
             <div class="breadcrumb">Barang &gt; Daftar</div>
             <div class="barang-header">
                 <div>
                     <h1>Barang</h1>
                     <div class="subtitle">Daftar inventaris barang SMK NEGERI 7 BALEENDAH</div>
                 </div>
-                <button class="add-btn"><i class="fa fa-plus"></i>Tambah</button>
             </div>
             <!-- QR Card -->
             <div class="qr-card">
